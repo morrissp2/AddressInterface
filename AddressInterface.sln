@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.31101.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AddressInterface", "AddressInterface\AddressInterface.csproj", "{F3124AFD-B9D7-4BAE-96B9-111516933EF9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestAddressConsoleApp", "TestAddressConsoleApp\TestAddressConsoleApp.csproj", "{F8DFE865-D265-4F1F-B946-EC1E1BEF4E4A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F3124AFD-B9D7-4BAE-96B9-111516933EF9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F3124AFD-B9D7-4BAE-96B9-111516933EF9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F3124AFD-B9D7-4BAE-96B9-111516933EF9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F3124AFD-B9D7-4BAE-96B9-111516933EF9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F8DFE865-D265-4F1F-B946-EC1E1BEF4E4A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F8DFE865-D265-4F1F-B946-EC1E1BEF4E4A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F8DFE865-D265-4F1F-B946-EC1E1BEF4E4A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F8DFE865-D265-4F1F-B946-EC1E1BEF4E4A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
