@@ -28,9 +28,21 @@ namespace AddressInterface
     /// </summary>
     public class AddressResponse
     {
-        public string Status { get; set; }   // "Success", "Failure", "Validation Exception" 
-        public int id { get; set; }
+        public string Status { get; set; }   // "Success", "Failure", "Validation Exception","No Record Found"
         public List<string> exceptions { get; set;}
+
+        // address primary details
+        public int id { get; set; }
+        public string AddressLine1 { get; set; }
+        public string AddressLine2 { get; set; }
+        public string ZipCode { get; set; }
+        public string Company { get; set; }
+        public string Name { get; set; }
+        public string City { get; set; }
+        
+        //state primary details
+        public string state_Abbreviation { get; set;  }
+        public string state_Name { get; set;  }
 
         public AddressResponse()
         {
@@ -38,6 +50,7 @@ namespace AddressInterface
         }
     }
 
+    
     /// <summary>
     /// The Address Maintenance class is responsible for adding, deleting, updating and searching for adresses.
     /// </summary>
@@ -223,19 +236,53 @@ namespace AddressInterface
         /// populated address entity with associated State object
         /// </summary>
         /// <param name="id">integer representing the id of the address record that is to be fetched</param>
-        /// <returns></returns>
-        public AppCore_Address findAddress( int id)
+        /// <returns>AddressResponse which contains any errors/validation messages or details of address added</returns>
+        public AddressResponse findAddress( int id)
         {
-            using (var db = new AddressContext())
+            AddressResponse response = new AddressResponse();
+            try
             {
-                var query = from add in db.AppCore_Address.Include("AppCore_State")
-                            where add.Id == id
-                            select add;
-                var address = query.FirstOrDefault<AppCore_Address>();
-                return address;
+                using (var db = new AddressContext())
+                {
+                    var query = from add in db.AppCore_Address.Include("AppCore_State")
+                                where add.Id == id
+                                select add;
+                    var address = query.FirstOrDefault<AppCore_Address>();
+                    if (address != null)
+                    {
+                        response.Status = "Success";
+                        response.Name = address.Name;
+                        response.id = address.Id;
+                        response.AddressLine1 = address.AddressLine1;
+                        response.AddressLine2 = address.AddressLine2;
+                        response.City = address.City;
+                        response.Company = address.Company;
+                        response.ZipCode = address.Zip;
+                        response.state_Abbreviation = address.AppCore_State.Abbreviation;
+                        response.state_Name = address.AppCore_State.Name;
+                    }
+                    else
+                    {
+                        response.Status = "No Record Found";
+                        response.exceptions.Add("No record found with id: " + id.ToString());
+                    }
+                }
             }
+            catch (Exception e)
+            {
+                response.exceptions.Add("Exception occurred: " + e.Message);
+                response.Status = "Failure";
+                return response;
+            }
+            return response;
         }
 
+        /// <summary>
+        /// validateState takes in a State abreviation and looks in the States class variable to determine if a valid state 
+        /// was passed in
+        /// </summary>
+        /// <param name="stateAbrev"></param>
+        /// <returns>true if valid state abbreviation is passed in false if not</returns>
         private bool validateState ( string stateAbrev )
         {
             if (States.Find(p => p.Abbreviation == stateAbrev) == null)
