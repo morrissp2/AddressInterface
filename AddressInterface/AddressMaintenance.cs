@@ -115,13 +115,13 @@ namespace AddressInterface
             }
             catch (DbEntityValidationException e)
             {
-                foreach (var eve in e.EntityValidationErrors)
+                foreach (var entityValidationErrors in e.EntityValidationErrors)
                 {
-                    string exceptionString = "Entity of Type " + eve.Entry.Entity.GetType().Name + " in state " + eve.Entry.State + " has the following validation errors:";
-                    foreach (var ve in eve.ValidationErrors)
+                    string exceptionString = "Entity of Type " + entityValidationErrors.Entry.Entity.GetType().Name + " in state " + entityValidationErrors.Entry.State + " has the following validation errors:";
+                    foreach (var validationErrors in entityValidationErrors.ValidationErrors)
                     {
                         exceptionString = exceptionString + "\n";
-                        exceptionString = exceptionString + " - Property: " + ve.PropertyName + " Error: " + ve.ErrorMessage;
+                        exceptionString = exceptionString + " - Property: " + validationErrors.PropertyName + " Error: " + validationErrors.ErrorMessage;
                     }
                     response.exceptions.Add(exceptionString);
                     response.Status = "Validation Errors";
@@ -146,51 +146,61 @@ namespace AddressInterface
         public AddressResponse addAddress(AddressRequest request)
         {
             AddressResponse response = new AddressResponse();
-            try
-            {
-                using (var db = new AddressContext())
-                {
-                    AppCore_Address address = new AppCore_Address();
-                    address.AddressLine1 = request.AddressLine1;
-                    address.AddressLine2 = request.AddressLine2;
-                    address.City = request.City;
-                    address.Company = request.Company;
-                    address.Zip = request.ZipCode;
-                    address.Name = request.Name;
-                    //var query = from st in States 
-                    //            where st.Abbreviation == "WA"
-                    //            select st;
-                    //var state = query.FirstOrDefault<AppCore_State>();
-                    //var state = States.Find(p => p.Abbreviation == "WA");
-                    address.AppCore_State = db.AppCore_State.Where(st => st.Abbreviation == request.StateAbbreviation).First();
-                    db.AppCore_Address.Add(address);
-                    db.SaveChanges();
-                    response.id = address.Id;
-                    response.Status = "Success";
-                }
 
-            }
-            catch (DbEntityValidationException e)
+            // first check to see if have valid state abbreviation
+            if (validateState(request.StateAbbreviation))
             {
-                foreach (var eve in e.EntityValidationErrors)
+                try
                 {
-                    string exceptionString = "Entity of Type " + eve.Entry.Entity.GetType().Name + " in state " + eve.Entry.State + " has the following validation errors:";          
-                    foreach (var ve in eve.ValidationErrors)
+                    using (var db = new AddressContext())
                     {
-                        exceptionString = exceptionString + "\n";
-                        exceptionString = exceptionString + " - Property: " + ve.PropertyName + " Error: " + ve.ErrorMessage ;
+                        AppCore_Address address = new AppCore_Address();
+                        address.AddressLine1 = request.AddressLine1;
+                        address.AddressLine2 = request.AddressLine2;
+                        address.City = request.City;
+                        address.Company = request.Company;
+                        address.Zip = request.ZipCode;
+                        address.Name = request.Name;
+                        //var query = from st in States 
+                        //            where st.Abbreviation == "WA"
+                        //            select st;
+                        //var state = query.FirstOrDefault<AppCore_State>();
+                        //var state = States.Find(p => p.Abbreviation == "WA");
+                        address.AppCore_State = db.AppCore_State.Where(st => st.Abbreviation == request.StateAbbreviation).First();
+                        db.AppCore_Address.Add(address);
+                        db.SaveChanges();
+                        response.id = address.Id;
+                        response.Status = "Success";
                     }
-                    response.exceptions.Add(exceptionString);
-                    response.Status = "Validation Errors";
+
+                }
+                catch (DbEntityValidationException e)
+                {
+                    foreach (var eve in e.EntityValidationErrors)
+                    {
+                        string exceptionString = "Entity of Type " + eve.Entry.Entity.GetType().Name + " in state " + eve.Entry.State + " has the following validation errors:";
+                        foreach (var ve in eve.ValidationErrors)
+                        {
+                            exceptionString = exceptionString + "\n";
+                            exceptionString = exceptionString + " - Property: " + ve.PropertyName + " Error: " + ve.ErrorMessage;
+                        }
+                        response.exceptions.Add(exceptionString);
+                        response.Status = "Validation Errors";
+                        return response;
+                    }
+                    //throw;
+                }
+                catch (Exception e)
+                {
+                    response.exceptions.Add("Exception occurred: " + e.Message);
+                    response.Status = "Failure";
                     return response;
                 }
-                //throw;
             }
-            catch (Exception e )
+            else
             {
-                response.exceptions.Add("Exception occurred: " + e.Message);
-                response.Status = "Failure";
-                return response;
+                response.exceptions.Add("Invalid state passed in: " + request.StateAbbreviation);
+                response.Status = "Validation Errors";
             }
             return response;
         }
@@ -224,6 +234,14 @@ namespace AddressInterface
                 var address = query.FirstOrDefault<AppCore_Address>();
                 return address;
             }
+        }
+
+        private bool validateState ( string stateAbrev )
+        {
+            if (States.Find(p => p.Abbreviation == stateAbrev) == null)
+                return false;
+            else
+                return true;
         }
     }
 }
